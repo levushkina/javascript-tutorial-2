@@ -1,0 +1,17 @@
+{{#each traits}}
+<div class="filter-block">
+  <div class="filter-title">
+    {{this.name}}
+  </div>
+  {{#each this.values}}
+  <div class="filter-values">
+    <div>
+      <label>
+        <input class="js-filter-checkbox" name="{{../this.slug}}" type="checkbox" value="{{this.id}}" {{#if this.checked}}checked {{/if}}>
+        {{this.value}}
+      </label>
+    </div>
+  </div>
+  {{/each}}
+</div>
+{{/each}}

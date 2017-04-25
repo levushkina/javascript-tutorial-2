@@ -1,0 +1,19 @@
+<input type="hidden" value="{{product}}" class="js-product-id"/>
+{{#each traits}}
+<div class="filter-block js-product-trait" data-slug="{{this.slug}}" data-id="{{this.id}}" data-name="{{this.name}}">
+  <div class="filter-title">
+    {{this.name}}
+  </div>
+  {{#each this.values}}
+  <div class="filter-values">
+    <div>
+      <label>
+        <input class="js-trait-checkbox" name="{{this.value}}" type="checkbox" value="{{this.id}}" {{#if this.checked}}checked {{/if}}>
+        {{this.value}}
+      </label>
+    </div>
+  </div>
+  {{/each}}
+</div>
+{{/each}}
+<input type="submit" class="js-product-safe"/>

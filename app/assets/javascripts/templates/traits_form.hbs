@@ -1,0 +1,19 @@
+<form action="/">
+  <div class="grid-row">
+    <div class="grid-col-uv-12">
+      <h2>Names</h2>
+    </div>
+    <div class="grid-col-uv-12">
+      <h2>Values</h2>
+    </div>
+  </div>
+  {{#each this}}
+    {{> _trait_row}}
+  {{/each}}
+  <div>
+    <span class="dashed-link js-add-row">Добавить характеристику</span>
+  </div>
+  <div class="submit-block">
+    <button type="submit" class="js-safe-traits" value="Save">Save</button>
+  </div>
+</form>
