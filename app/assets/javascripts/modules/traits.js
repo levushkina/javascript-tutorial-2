@@ -11,8 +11,9 @@ app.modules.traits = (function(self) {
   }
 
   function _showAssignPopup() {
-    var traitId = Number($(this).siblings('.js-row-id').val());
-    const traitsPopupTemplate = require('../templates/traits_popup.hbs');
+    var
+      traitId = Number($(this).siblings('.js-row-id').val()),
+      traitsPopupTemplate = require('../templates/traits_popup.hbs');
 
     _$assignProductsPopup
       .html(traitsPopupTemplate({
@@ -42,7 +43,7 @@ app.modules.traits = (function(self) {
     $(this).parent().remove();
   }
 
-  function _safeTraits() {
+  function _saveTraits() {
     _api({
       url: '/api/traits',
       data: JSON.stringify(_traits.data)
@@ -63,7 +64,7 @@ app.modules.traits = (function(self) {
 
   function _getTraits() {
     _traits.data = [];
-    $('.js-trait-row').each(function(){
+    $('.js-trait-row').each(function() {
       var
         $this = $(this),
         traitRow = {},
@@ -76,7 +77,7 @@ app.modules.traits = (function(self) {
         slug: $this.find('.js-row-slug').val(),
         values: []
       };
-      $this.find('.js-trait-value').each(function(){
+      $this.find('.js-trait-value').each(function() {
         value = $(this);
         traitRow.values.push(valuesItem = {
           id: parseInt(value.find('.js-value-id').val()),
@@ -86,7 +87,7 @@ app.modules.traits = (function(self) {
       _traits.data.push(traitRow);
     });
     _compareTraits();
-    _safeTraits();
+    _saveTraits();
   }
 
   function _compareTraits() {
@@ -95,7 +96,6 @@ app.modules.traits = (function(self) {
       app.config.traits.data.forEach(function(oldTrait) {
         if (newId === oldTrait.id) {
           _traits.data.splice(i, 1, $.extend(true, oldTrait, newTrait));
-
         }
       });
     });
@@ -130,41 +130,47 @@ app.modules.traits = (function(self) {
   };
 
   function _getProductsAssignation() {
-    var $checkbox = $('.js-assign-products').serializeArray();
-
-    $.each($checkbox, function(i, field){
-      _newAssignedProducts.push(Number(field.value))
+    _newAssignedProducts = $('.js-assign-checkbox').serializeArray().map(function(item) {
+      return Number(item.value);
     });
     _saveProductsAssignation(Number($('.js-trait-id').val()));
   }
 
   function _saveProductsAssignation(traitId) {
-    var assignments, trait;
+    var assignments;
 
-    trait = app.config.traits.data.find(function(trait) { return trait.id === traitId; });
-    _oldAssignedProducts = trait.allowed_products;
-
+    _oldAssignedProducts = _findTraid(traitId)['allowed_products'];
     assignments = {
       markedForPost: _newAssignedProducts.diff(_oldAssignedProducts),
       markedForDelete: _oldAssignedProducts.diff(_newAssignedProducts)
     };
     assignments.markedForDelete.forEach(function(id) {
-      _api({url: '/api/traits/' + traitId + '/products/' + id, method: 'DELETE'}).then(function(response) { trait = response; });
+      _api({url: '/api/traits/' + traitId + '/products/' + id, method: 'DELETE'}).then(function(response) {
+        $.extend(_findTraid(traitId), response);
+      });
     });
     assignments.markedForPost.forEach(function(id) {
-      _api({url: '/api/traits/' + traitId + '/products/' + id, method: 'POST'}).then(function(response) { trait = response; });
+      _api({url: '/api/traits/' + traitId + '/products/' + id, method: 'POST'}).then(function(response) {
+        $.extend(_findTraid(traitId), response);
+      });
     });
     _$assignProductsPopup.dialog('close');
+  }
+
+  function _findTraid(traitId) {
+    return app.config.traits.data.find(function(trait) {
+      return trait.id === traitId;
+    });
   }
 
   function _listener() {
     $(document)
       .on('click', '.js-add-value', _renderTraitsValue)
       .on('click', '.js-add-row', _renderTraitsRow)
-      .on('click', '.delete-button', _deleteTraits)
-      .on('click', '.assign-products', _showAssignPopup)
-      .on('click', '.js-assigned-safe', _getProductsAssignation)
-      .on('click', '.js-safe-traits', function(e){
+      .on('click', '.js-delete-button', _deleteTraits)
+      .on('click', '.js-assign-products', _showAssignPopup)
+      .on('click', '.js-assigned-save', _getProductsAssignation)
+      .on('click', '.js-save-traits', function(e){
         e.preventDefault();
         _getTraits();
       });

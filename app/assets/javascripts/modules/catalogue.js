@@ -1,7 +1,6 @@
 app.modules.catalogue = (function(self) {
 
-  var
-    _filter = {};
+  var _filter = {};
 
   function _init() {
     _renderProducts();
@@ -60,8 +59,9 @@ app.modules.catalogue = (function(self) {
   }
 
   function _showProductsPopoup() {
-    var productId = parseInt($(this).data('id'));
-    const productPopupTemplate = require('../templates/products_popup.hbs');
+    var
+      productId = parseInt($(this).data('id')),
+      productPopupTemplate = require('../templates/products_popup.hbs');
 
     _prepareTraits(productId);
     $('.js-popup-wrapper')
@@ -83,10 +83,16 @@ app.modules.catalogue = (function(self) {
     });
     app.config.traits.data.forEach(function(trait) {
       var productTrait;
+
       if (_getPermittedTrait(trait, productId)) {
         productTrait = product.traits.find(function(productTraitItem) {
           return trait.id === productTraitItem.id;
         });
+
+        if (!productTrait) {
+          return false;
+        }
+        
         trait.values.forEach(function(permitted_value) {
           permitted_value.checked = productTrait.values.some(function(productTraitValue) {return productTraitValue.id === permitted_value.id})
         });
@@ -120,11 +126,11 @@ app.modules.catalogue = (function(self) {
         id: parseInt(data.id),
         slug: data.slug,
         name: data.name,
-        values: $this.find('.js-trait-checkbox').serializeArray()
+        values: _getTraitalues($this.find('.js-trait-checkbox'))
       };
       productTraits.push(trait);
     });
-    product.traits.values = productTraits;
+    product.traits = productTraits;
     _sendProduct(product, productId);
     $('.js-popup-wrapper').dialog('close');
   }
@@ -138,8 +144,14 @@ app.modules.catalogue = (function(self) {
     });
   }
 
+  function _getTraitalues($checkbox) {
+    return $checkbox.serializeArray().map(function(item) {
+      return {id: Number(item.value), value: item.name}
+    });
+  }
+
   function _getProductIndex(productId) {
-    return app.config.products.data.findIndex(function(product) { product.id === productId});
+    return app.config.products.data.findIndex(function(product) {product.id === productId});
   }
 
   function _listener() {
@@ -147,8 +159,8 @@ app.modules.catalogue = (function(self) {
       .on('change', '.js-filter-checkbox', function() {
         _updateFilter($(this));
       })
-      .on('click', '.assign-traits-link', _showProductsPopoup)
-      .on('click', '.js-product-safe', _saveProductTraits);
+      .on('click', '.js-assign-traits-link', _showProductsPopoup)
+      .on('click', '.js-product-save', _saveProductTraits);
   }
 
   self.load = function() {
